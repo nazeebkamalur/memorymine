@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Search } from "lucide-react";
-import { askMemory } from "../services/api";
+import { searchMemory } from "../services/api";
 
 export default function SearchBar({ onResult }) {
   const [query, setQuery] = useState("");
@@ -11,40 +11,34 @@ export default function SearchBar({ onResult }) {
 
     setLoading(true);
 
-    try {
-      const data = await askMemory(query);
+    // 🔥 Remove previous search immediately
+    onResult(null);
 
-      // Send result to Home.jsx
-      if (onResult) onResult(data);
+    try {
+      const res = await searchMemory(query);
+      onResult(res);
     } catch (err) {
       console.error(err);
       alert("Search failed");
-    }
-
-    setLoading(false);
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter") {
-      handleSearch();
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="search-bar">
-      <Search size={22} className="search-icon" />
+    <div className="hero-search">
+      <Search className="hero-icon" size={24} />
 
       <input
         type="text"
-        placeholder="Where is my prescription from Mom?"
+        placeholder="Ask anything from your memories..."
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        onKeyDown={handleKeyDown}
+        onKeyDown={(e) => e.key === "Enter" && handleSearch()}
       />
 
       <button onClick={handleSearch} disabled={loading}>
         {loading ? "Searching..." : "Search"}
       </button>
     </div>
-  );
 }

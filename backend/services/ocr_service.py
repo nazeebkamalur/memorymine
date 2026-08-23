@@ -1,27 +1,20 @@
-import os
-import fitz  # PyMuPDF
-import pytesseract
 from PIL import Image
+import pytesseract
+import pymupdf as fitz
 
-def extract_text(path):
-    ext = os.path.splitext(path)[1].lower()
+# Windows Tesseract path
+pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
+def extract_text(file_path):
     # PDF
-    if ext == ".pdf":
+    if file_path.lower().endswith(".pdf"):
+        doc = fitz.open(file_path)
         text = ""
-        doc = fitz.open(path)
         for page in doc:
             text += page.get_text()
+        doc.close()
         return text.strip()
 
-    # Images
-    elif ext in [".jpg", ".jpeg", ".png"]:
-        img = Image.open(path)
-        return pytesseract.image_to_string(img).strip()
-
-    # TXT / WhatsApp
-    elif ext == ".txt":
-        with open(path, "r", encoding="utf-8") as f:
-            return f.read().strip()
-
-    return ""
+    # Image (PNG/JPG/JPEG)
+    img = Image.open(file_path)
+    return pytesseract.image_to_string(img).strip()

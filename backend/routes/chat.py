@@ -11,7 +11,8 @@ class ChatRequest(BaseModel):
 
 @router.post("/chat")
 async def chat(req: ChatRequest):
-    # CHANGE HERE 👇 (remove k=3)
+
+    # Return only the best matching memory
     memories = search_vectors(req.question)
 
     if not memories:
@@ -20,9 +21,11 @@ async def chat(req: ChatRequest):
             "results": []
         }
 
-    answer = generate_answer(req.question, memories)
+    best_memory = [memories[0]]
+
+    answer = generate_answer(req.question, best_memory)
 
     return {
         "answer": answer,
-        "results": memories
+        "results": best_memory
     }

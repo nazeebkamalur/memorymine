@@ -39,6 +39,7 @@ export default function Home() {
 
   const handleUpload = async (e) => {
     const files = Array.from(e.target.files);
+
     if (!files.length) return;
 
     try {
@@ -68,6 +69,7 @@ export default function Home() {
 
   return (
     <div className="home">
+      {/* HERO */}
       <section className="hero">
         <h1 className="logo">MemoryMine</h1>
 
@@ -76,31 +78,36 @@ export default function Home() {
         </p>
 
         <SearchBar onResult={setSearchResult} />
-
-        {searchResult && (
-          <section className="result-card">
-            <h3>✨ Memory Found</h3>
-
-            <p className="result-sub">
-              Retrieved from your indexed memories
-            </p>
-
-            <div className="result-answer">
-              {searchResult.answer ||
-                searchResult.response ||
-                "No summary available"}
-            </div>
-
-            {searchResult.results?.map((item) => (
-              <div key={item.id} className="result-item">
-                <strong>{item.filename}</strong>
-                <p>{item.text.substring(0, 150)}...</p>
-              </div>
-            ))}
-          </section>
-        )}
       </section>
 
+      {/* SEARCH RESULT */}
+      {searchResult && (
+        <section className="result-card">
+          <h3>✨ Memory Found</h3>
+
+          <p className="result-sub">
+            Retrieved from your indexed memories
+          </p>
+
+          {/* AI Answer */}
+          <div className="result-answer">
+            {searchResult.answer}
+          </div>
+
+          {/* ONLY ONE SOURCE FILE */}
+          {searchResult.results?.[0] && (
+            <div className="result-file">
+              <h4>{searchResult.results[0].filename}</h4>
+
+              <p>
+                {searchResult.results[0].text.slice(0, 180)}...
+              </p>
+            </div>
+          )}
+        </section>
+      )}
+
+      {/* UPLOAD */}
       <section className="upload-section">
         <label className="upload-btn">
           <Upload size={20} />
@@ -116,6 +123,7 @@ export default function Home() {
         </label>
       </section>
 
+      {/* PROGRESS */}
       {total > 0 && progress < 100 && (
         <section className="progress-card">
           <h3>Indexing Memories</h3>
@@ -128,13 +136,14 @@ export default function Home() {
             <div
               className="progress-fill"
               style={{ width: `${progress}%` }}
-            ></div>
+            />
           </div>
 
           <strong>{progress}%</strong>
         </section>
       )}
 
+      {/* RECENT MEMORIES */}
       <RecentMemories memories={memories} />
     </div>
   );

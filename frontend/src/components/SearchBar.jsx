@@ -10,8 +10,6 @@ export default function SearchBar({ onResult }) {
     if (!query.trim()) return;
 
     setLoading(true);
-
-    // 🔥 Remove previous search immediately
     onResult(null);
 
     try {
@@ -41,4 +39,5 @@ export default function SearchBar({ onResult }) {
         {loading ? "Searching..." : "Search"}
       </button>
     </div>
+  );
 }

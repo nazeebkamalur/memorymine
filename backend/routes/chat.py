@@ -1,45 +1,29 @@
-import { useState } from "react";
-import { Search } from "lucide-react";
-import { searchMemory } from "../services/api";
+from fastapi import APIRouter
+from pydantic import BaseModel
 
-export default function SearchBar({ onResult }) {
-  const [query, setQuery] = useState("");
-  const [loading, setLoading] = useState(false);
+from services.vector_service import search_vectors
+from services.llm_service import generate_answer
 
-  const handleSearch = async () => {
-    if (!query.trim()) return;
+router = APIRouter()
 
-    setLoading(true);
+class ChatRequest(BaseModel):
+    question: str
 
-    // Clear previous result
-    onResult(null);
+@router.post("/chat")
+async def chat(req: ChatRequest):
+    memories = search_vectors(req.question)
 
-    try {
-      const res = await searchMemory(query);
-      onResult(res);
-    } catch (err) {
-      console.error(err);
-      alert("Search failed");
-    } finally {
-      setLoading(false);
+    if not memories:
+        return {
+            "answer": "No relevant memory found.",
+            "results": []
+        }
+
+    best_memory = [memories[0]]
+
+    answer = generate_answer(req.question, best_memory)
+
+    return {
+        "answer": answer,
+        "results": best_memory
     }
-  };
-
-  return (
-    <div className="hero-search">
-      <Search className="hero-icon" size={24} />
-
-      <input
-        type="text"
-        placeholder="Ask anything from your memories..."
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-      />
-
-      <button onClick={handleSearch} disabled={loading}>
-        {loading ? "Searching..." : "Search"}
-      </button>
-    </div>
-  );
-}
